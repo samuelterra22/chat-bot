@@ -1,73 +1,87 @@
-# v2 syntax
-version: '2'
 
-# Named volumes
-volumes:
-  # PostgreSQL Data
-  codecasts-pgsql-data:
-    driver: local
-  # Redis Data
-  codecasts-redis-data:
-    driver: local
-  # ElasticSearch Data
-  codecasts-elastic-data:
-    driver: local
+# PostgreSQL Data
+chat-bot-pgsql-data:
+  driver: local
+
+# Redis Data
+chat-bot-redis-data:
+  driver: local
+
+# ~/.config
+chat-bot-temp-config:
+  driver: local
+
+# ~/.cache
+chat-bot-temp-cache:
+  driver: local
+
+# ~/.composer
+chat-bot-temp-composer:
+  driver: local
 
 services:
-  # PHP (with Caddy)
-  app:
-    image: ambientum/php:7.0-caddy
-    container_name: codecasts-php
-    volumes:
-      - .:/var/www/app
-    ports:
-      - "80:8080"
-    links:
-      - pgsql
-      - cache
-      - elastic
 
-  # Laravel Queues
-  queue:
-    image: ambientum/php:7.0
-    container_name: codecasts-queue
-    command: php artisan queue:listen
-    volumes:
-      - .:/var/www/app
-    links:
-      - pgsql
-      - cache
-      - elastic
-
-  # PostgreSQL (9.5)
-  pgsql:
-    image: ambientum/postgres:9.5
-    container_name: codecasts-pgsql
-    volumes:
-      - codecasts-pgsql-data:/var/lib/postgresql/data
+  mailcatcher:
+    image: ambientum/mailcatcher:latest
+    container_name: chat-bot-mailcatcher
     ports:
-      - "5432:5432"
+      - 1025:1025
+      - 1080:1080
+    
+  
+  mysql:
+    image: ambientum/mysql:5.7
+    container_name: chat-bot-mysql
+    volumes:
+      - chat-bot-mysql-data:/var/lib/mysql
+    ports:
+      - 3306:3306
     environment:
-      - POSTGRES_DB=codecasts
-      - POSTGRES_USER=codecasts
-      - POSTGRES_PASSWORD=codecasts
+      - MYSQL_ROOT_PASSWORD=chatbot
+      - MYSQL_DATABASE=chatbot
+      - MYSQL_USER=chatbot
+      - MYSQL_PASSWORD=chatbot
 
-  # Redis
   cache:
-    image: ambientum/redis:3.2
-    container_name: codecasts-redis
+    image: redis:4.0
+    container_name: chat-bot-redis
     command: --appendonly yes
     volumes:
-      - codecasts-redis-data:/data
+      - chat-bot-redis-data:/data
     ports:
-      - "6379:6379"
+      - 6379:6379
 
-  # Elastic Search
-  elastic:
-    image: elasticsearch:2.3
-    container_name: codecasts-elastic
+  app:
+    image: ambientum/php:7.1-nginx
+    container_name: chat-bot-api
+    environment:
+      - XDEBUG_ENABLE=true
+      - PHP_IDE_CONFIG=serverName=ambientum
     volumes:
-      - codecasts-elastic-data:/usr/share/elasticsearch/data
+      - .:/var/www/app
+      - chat-bot-temp-config:/home/ambientum/.config
+      - chat-bot-temp-cahe:/home/ambientum/.cache
+      - chat-bot-temp-local:/home/ambientum/.local
+      - chat-bot-temp-composer:/home/ambientum/.composer
     ports:
-     - "9200:9200"
-     - "9300:9300"
+      - 8080:8080
+      - 8083:8083
+    links:
+      - mysql
+      - cache
+      - mailcatcher
+
+#  queue:
+#    image: ambientum/php:7.1
+#    container_name: chat-bot-queue
+#    command: php artisan horizon
+#    volumes:
+#      - .:/var/www/app
+#      - chat-bot-temp-config:/home/ambientum/.config
+#      - chat-bot-temp-cahe:/home/ambientum/.cache
+#      - chat-bot-temp-local:/home/ambientum/.local
+#      - chat-bot-temp-composer:/home/ambientum/.composer
+#    links:
+#      - mysql
+#      - cache
+#      - mailcatcher
