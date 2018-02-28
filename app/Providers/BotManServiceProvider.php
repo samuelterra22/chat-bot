@@ -11,14 +11,24 @@ namespace ChatBot\Providers;
 use BotMan\BotMan\BotManFactory;
 use BotMan\BotMan\Cache\LaravelCache;
 use BotMan\BotMan\Container\LaravelContainer;
+use BotMan\BotMan\Drivers\DriverManager;
 use BotMan\BotMan\Storages\Drivers\FileStorage;
 use Illuminate\Support\ServiceProvider;
+use \BotMan\Drivers\Facebook\FacebookDriver;
 
 class BotManServiceProvider extends ServiceProvider
 {
 
+    /**
+     * Register
+     */
     public function register()
     {
+
+        // loads facebook driver
+        DriverManager::loadDriver(FacebookDriver::class);
+
+        // register botman singleton
         $this->app->singleton('botman', function ($app) {
             $storage = new FileStorage(storage_path('botman'));
 

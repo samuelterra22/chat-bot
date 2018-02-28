@@ -160,6 +160,9 @@ return [
         ChatBot\Providers\EventServiceProvider::class,
         ChatBot\Providers\RouteServiceProvider::class,
 
+        // BotMan
+        ChatBot\Providers\BotManServiceProvider::class,
+
     ],
 
     /*

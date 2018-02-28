@@ -13,6 +13,23 @@ use Illuminate\Http\Request;
 |
 */
 
+Route::get('botman', function (Request $request) {
+    return $request->get('hub_challenge');
+});
+
+Route::post('botman', function (Request $request) {
+    // get botman instance
+    $botman = resolve('botman');
+
+    $botman->hears('foo', function ($bot) {
+        $bot->reply('Hello World');
+    });
+
+    // listen for messages
+    $botman->listen();
+
+});
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
