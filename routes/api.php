@@ -3,6 +3,7 @@
 use BotMan\BotMan\BotMan;
 use BotMan\BotMan\Messages\Attachments\File;
 use BotMan\BotMan\Messages\Outgoing\OutgoingMessage;
+use ChatBot\Conversations\InscriptionConversation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +25,12 @@ Route::get('botman', function (Request $request) {
 Route::post('botman', function (Request $request) {
     // get botman instance
     $botman = resolve('botman');
+
+    // listen for Workshop
+    $botman->hears('workshop', function (BotMan $bot) {
+        // Start conversation
+        $bot->startConversation(new InscriptionConversation());
+    });
 
     // Hello World
     $botman->hears('foo', function (BotMan $bot) {
