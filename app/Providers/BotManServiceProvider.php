@@ -25,9 +25,10 @@ class BotManServiceProvider extends ServiceProvider
      */
     public function register()
     {
-
-        // loads facebook driver
+        // loads Facebook driver
         DriverManager::loadDriver(FacebookDriver::class);
+
+        // loads Telegram driver
         DriverManager::loadDriver(TelegramDriver::class);
 
         // register botman singleton

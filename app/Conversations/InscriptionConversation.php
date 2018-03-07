@@ -97,9 +97,13 @@ class InscriptionConversation extends Conversation
         $this->address = dispatch_now(new SearchZip($this->student->zip));
 
         $this->say('Confira seus dados:');
-        $this->bot->typesAndWaits(3);
         $this->say(implode("\n", $this->address));
 
+        $this->say('Vou procurar sua fatura...');
+        $this->bot->typesAndWaits(3);
+        if ($this->student->invoice) {
+            $this->say('Conferi aqui e já tenho também sua fatura, está tudo certo!');
+        }
     }
 
     public function offerReceiptUpload($tryAgain = false)
@@ -110,7 +114,8 @@ class InscriptionConversation extends Conversation
 
             foreach ($images as $image) {
                 /** @var Image $image */
-                $this->say($image->getUrl());
+                $this->student->invoice = $image->getUrl();
+                $this->student->save();
             }
 
         }, function (Answer $answer) {
@@ -135,7 +140,7 @@ class InscriptionConversation extends Conversation
         // start a new model instance
         $this->student = $student ?? (new Student());
 
-        if ($this->student->id) {
+        if ($this->student->id && !$this->student->invoice) {
             $this->offerReceiptUpload();
         } else {
             // redirect to welcome
