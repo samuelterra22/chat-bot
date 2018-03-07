@@ -9,6 +9,7 @@
 namespace ChatBot\Conversations;
 
 
+use BotMan\BotMan\Messages\Attachments\Image;
 use BotMan\BotMan\Messages\Conversations\Conversation;
 use BotMan\BotMan\Messages\Incoming\Answer;
 use ChatBot\integration\SearchZip;
@@ -96,7 +97,28 @@ class InscriptionConversation extends Conversation
         $this->address = dispatch_now(new SearchZip($this->student->zip));
 
         $this->say('Confira seus dados:');
+        $this->bot->typesAndWaits(3);
         $this->say(implode("\n", $this->address));
+
+    }
+
+    public function offerReceiptUpload($tryAgain = false)
+    {
+        $message = 'Você já está inscrito, porém ainda não identifiquei o comprovante! Quer adicionar agora?';
+        $this->askForImages($tryAgain ? 'Tente novamente' : $message, function ($images) {
+            // valid images
+
+            foreach ($images as $image) {
+                /** @var Image $image */
+                $this->say($image->getUrl());
+            }
+
+        }, function (Answer $answer) {
+            // invalid images
+            $this->say('Desculpe, mas não pude entender a imagem enviada.');
+
+            $this->offerReceiptUpload(true);
+        });
 
     }
 
@@ -113,7 +135,11 @@ class InscriptionConversation extends Conversation
         // start a new model instance
         $this->student = $student ?? (new Student());
 
-        // redirect to welcome
-        $this->welcomeStudent();
+        if ($this->student->id) {
+            $this->offerReceiptUpload();
+        } else {
+            // redirect to welcome
+            $this->welcomeStudent();
+        }
     }
 }

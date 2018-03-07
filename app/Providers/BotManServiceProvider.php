@@ -27,6 +27,7 @@ class BotManServiceProvider extends ServiceProvider
 
         // loads facebook driver
         DriverManager::loadDriver(FacebookDriver::class);
+        DriverManager::loadDriver(TelegramDriver::class);
 
         // register botman singleton
         $this->app->singleton('botman', function ($app) {
