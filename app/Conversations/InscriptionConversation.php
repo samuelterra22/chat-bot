@@ -108,7 +108,7 @@ class InscriptionConversation extends Conversation
 
     public function offerReceiptUpload($tryAgain = false)
     {
-        $message = 'Você já está inscrito, porém ainda não identifiquei o comprovante! Quer adicionar agora?';
+        $message = 'Você já está inscrito, porém ainda não identifiquei o comprovante! Me manda ai que anexo ela ao seu cadastro';
         $this->askForImages($tryAgain ? 'Tente novamente' : $message, function ($images) {
             // valid images
 
@@ -117,6 +117,8 @@ class InscriptionConversation extends Conversation
                 $this->student->invoice = $image->getUrl();
                 $this->student->save();
             }
+
+            $this->say('Prontinho meu amigo!');
 
         }, function (Answer $answer) {
             // invalid images
