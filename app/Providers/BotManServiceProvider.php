@@ -13,6 +13,7 @@ use BotMan\BotMan\Cache\LaravelCache;
 use BotMan\BotMan\Container\LaravelContainer;
 use BotMan\BotMan\Drivers\DriverManager;
 use BotMan\BotMan\Storages\Drivers\FileStorage;
+use BotMan\Drivers\Telegram\TelegramDriver;
 use Illuminate\Support\ServiceProvider;
 use \BotMan\Drivers\Facebook\FacebookDriver;
 
